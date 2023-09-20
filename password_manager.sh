@@ -2,19 +2,55 @@
 
 # Add Passwordが選択されたときの処理
 add_password () {
-  read -p "サービス名を入力してください:" serviceName
-  read -p "ユーザー名を入力してください:" userName
-  read -p "パスワードを入力してください:" password
+  while :
+  do
+    read -p "サービス名を入力してください:" serviceName
+    exists=`grep -x サービス名:$serviceName password.txt 2> /dev/null`
+    if [ -z "$serviceName" ]; then
+      echo "サービス名が未入力です"
+    elif [ "$exists" ]; then
+      echo "そのサービスはすでに登録されています"
+    else
+      break
+    fi
+  done
+
+  while :
+  do
+    read -p "ユーザー名を入力してください:" userName
+    if [ -z "$userName" ]; then
+      echo "ユーザー名が未入力です"
+    else
+      break
+    fi
+  done
+
+  while :
+  do
+  read -s -p "パスワードを入力してください（非表示）:" password
+    if [ -z "$password" ]; then
+      echo
+      echo "パスワードが未入力です"
+    else
+      break
+    fi
+  done
+
   echo -e "サービス名:"$serviceName"\nユーザー名:"$userName"\nパスワード:"$password"\n" >> password.txt
-  echo -e "\nパスワードの追加は成功しました。"
+  echo -e "\nパスワードの追加に成功しました。\n"
 }
 
 # Get Passwordが選択されたときの処理
 get_password () {
     read -p "サービス名を入力してください:" serviceName
-    grep -A 2 -x サービス名:$serviceName password.txt 2> /dev/null
-    if [ $? != 0 ]; then
+    result=`grep -A 2 -x サービス名:$serviceName password.txt 2> /dev/null`
+
+    if [ -z "$serviceName" ]; then
+      echo "サービス名が未入力です"
+    elif [ ! "$result" ]; then
       echo -e "そのサービスは登録されていません。\n"
+    else 
+      echo "$result"
     fi
 }
 
@@ -22,7 +58,7 @@ get_password () {
 echo "パスワードマネージャーへようこそ！"
 while :
 do
-  read -p "次の選択肢から入力してください(Add Password/Get Password/Exit):" selected
+  read -p "次の選択肢から入力してください( Add Password / Get Password / Exit ):" selected
 
   case $selected in
     "Add Password") 
@@ -33,7 +69,7 @@ do
       echo "Thank you!"
       break;;
     *) 
-      echo -e "入力が間違えています。Add Password/Get Password/Exit から入力してください。\n";;
+      echo -e "入力が間違っています。Add Password / Get Password / Exit から入力してください。\n";;
   esac
 
 done
